@@ -1,1 +1,1 @@
-# Upaknee PHP Client
+# Terminal Systems PHP Client
