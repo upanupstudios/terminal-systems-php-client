@@ -1,6 +1,6 @@
 <?php
 
-namespace Upanupstudios\Upaknee\Php\Client;
+namespace Upanupstudios\TerminalSystems\Php\Client;
 
 final class Config
 {
