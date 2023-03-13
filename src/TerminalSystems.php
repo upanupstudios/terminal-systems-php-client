@@ -12,7 +12,7 @@ class TerminalSystems
    *
    * @var string $api_url
    */
-  private $api_url = 'https://[code].terminalsystems.com';
+  private $api_url = 'https://[code].terminalsystems.com/api_export.php';
 
   private $config;
   private $httpClient;
@@ -50,18 +50,16 @@ class TerminalSystems
       ];
 
       if(!empty($options)) {
-        $options = array_merge($defaultOptions, $options);
+        // Deep merge array
+        $options = array_merge_recursive($defaultOptions, $options);
       } else {
         $options = $defaultOptions;
       }
 
       $request = $this->httpClient->request($method, $api_url, $options);
 
-      // Return as array
-      $response = $this->prepareResponse($request);
-
-    } catch (\JsonException $exeption) {
-      $response = $exeption->getMessage();
+      $response = $request->getBody();
+      $response = $response->__toString();
     } catch (RequestException $exception) {
       $response = $exception->getMessage();
     }
@@ -70,37 +68,26 @@ class TerminalSystems
   }
 
   public function arrivals() {
-    return $this->request('GET', ['query' => ['arrdep' => 'a']]);
+    $data = $this->request('GET', ['query' => ['arrdep' => 'a']]);
+
+    try {
+      $data = json_decode($data, TRUE);
+    } catch (\JsonException $exeption) {
+      throw new \JsonException($exeption->getMessage(), $exeption->getCode(), $exeption);
+    }
+
+    return $data;
   }
 
   public function departures() {
-    return $this->request('GET', ['query' => ['arrdep' => 'd']]);
-  }
+    $data = $this->request('GET', ['query' => ['arrdep' => 'd']]);
 
-  /**
-   * @return object
-   *
-   * @throws \InvalidArgumentException
-   *  If $class does not exist.
-   */
-  public function api(string $class)
-  {
-    $api = null;
-
-    switch ($class) {
-      default:
-      throw new \InvalidArgumentException("Undefined api instance called: '$class'.");
-    }
-
-    return $api;
-  }
-
-  public function __call(string $name, array $args): object
-  {
     try {
-      return $this->api($name);
-    } catch (\InvalidArgumentException $e) {
-      throw new \BadMethodCallException("Undefined method called: '$name'.");
+      $data = json_decode($data, TRUE);
+    } catch (\JsonException $exeption) {
+      throw new \JsonException($exeption->getMessage(), $exeption->getCode(), $exeption);
     }
+
+    return $data;
   }
 }
